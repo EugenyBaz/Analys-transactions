@@ -17,6 +17,14 @@ def read_transactions_exl(file_path: Any) -> list[dict[Any, Any]]:
     return list_transactions_exl
 # print (read_transactions_exl(data_file_path_exl))
 
+date_string = '2021-12-15'
+current_date = datetime.strptime(date_string,'%Y-%m-%d' )
+start_of_month = current_date.replace(day=1)
+start_date = start_of_month.strftime('%Y-%m-%d'),
+end_date = current_date.strftime('%Y-%m-%d')
+
+
+
 def greeting(time_str):
     dt = datetime.strptime(time_str,'%Y-%m-%d %H:%M:%S')
 
@@ -51,30 +59,46 @@ transactions =  read_transactions_exl(data_file_path_exl)
 print (card_number(transactions))
 
 
-def card_info(transactions):
+date_string = '15.12.2021'
+current_date = datetime.strptime(date_string,'%d.%m.%Y')
+start_of_month = current_date.replace(day=1)
+start_date = start_of_month.strftime('%d.%m.%Y')
+end_date = current_date.strftime('%d.%m.%Y')
+
+def card_info(transactions,start,end):
+    result = []
     trans_list = {}
+
+    if isinstance(start, str):
+        start = datetime.strptime(start, '%d.%m.%Y').date()
+    if isinstance(end, str):
+        end = datetime.strptime(end, '%d.%m.%Y').date()
+
+
     for trans in transactions:
+        transaction_date = datetime.strptime(trans['Дата платежа'], '%d.%m.%Y').date()
+        if start <= transaction_date <= end:
+            card_number_f= trans['Номер карты']
+            card_number = card_number_f[1:5].replace(card_number_f[:-4], card_number_f[-4:])
+            amount = trans.get('Сумма операции', 0)
 
-        card_number_f= trans['Номер карты']
-        card_number = card_number_f[1:5].replace(card_number_f[:-4], card_number_f[-4:])
-        amount = trans.get('Сумма операции', 0)
+            if card_number not in trans_list:
+                trans_list[card_number] = 0
 
-        if card_number is not None:
-            round_amount = round(amount,2)
+            trans_list[card_number] += float(amount)
 
-            if card_number in trans_list:
+    for key,value in trans_list.items():
+        result.append ({
+        'last_digits': key,
+        'total_spent': round(value, 2),
+        'cashback': round((round(value, 2)/ 100), 2)
+    })
 
-                total_sum = trans_list[card_number] + round_amount
-                trans_list[card_number] = round(total_sum, 2)
-            else:
+    return result
 
-                trans_list[card_number] = round_amount
+print(card_info(transactions, start_date,end_date ))
 
-    return trans_list
-
-print(card_info(transactions))
-
-final_result = {"greeting": greeting('2024-12-31 12:30:45'), "cards" :[card_info(transactions)]}
+final_result = {"greeting": greeting('2024-12-31 12:30:45'), "cards" :[card_info(transactions, start_date,end_date )]}
 
 ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
 with open('proba.json', 'w', encoding= 'utf-8') as f:
