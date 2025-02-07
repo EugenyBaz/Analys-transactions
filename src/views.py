@@ -4,10 +4,16 @@ from typing import Any
 from datetime import datetime, date
 import math
 import json
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
 data_file_path_exl = os.path.join(project_root, "data", "operations.xlsx")
+data_file_path_json = os.path.join(project_root, "data", "user_settings.json")
 
 def read_transactions_exl(file_path: Any) -> list[dict[Any, Any]]:
     """Функция получения, чтения файла excel, преобразование в список словарей без нулевых значений по номеру карты"""
@@ -137,8 +143,82 @@ print(sort_by_amount(transactions_all, start_date,end_date))
 
 
 
+
+
+
+API_KEY = os.getenv("EXCHANGERATE_API_KEY")
+
+
+def convert_currency(user_settings):
+    """Функция конвертации валюты и вывода текущего курса"""
+    tot_res = []
+    currencies = user_settings.get("user_currencies", [])
+
+    for currency in currencies:
+        url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/{currency}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            res = round(data["conversion_rates"]["RUB"], 2)
+            tot_res.append({
+                "currency_rates": currency,
+                "rate": res
+            })
+        else:
+            print(f"Request failed with status code {response.status_code}")
+
+    return tot_res
+
+with open(data_file_path_json, 'r') as f:
+    user_settings = json.load(f)
+
+results = convert_currency(user_settings)
+
+print(results)
+
 final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
-                "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)]}
+                "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
+                "currency_rates":[convert_currency(user_settings)]}
+
+ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
+with open('proba.json', 'w', encoding= 'utf-8') as f:
+    f.write(ff_result)
+
+
+API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
+
+def result_ticker(user_settings):
+    """Функция конвертации валюты и вывода текущего курса"""
+    tot_res = []
+    tickers = user_settings.get("user_stocks", [])
+
+    for tick in tickers:
+        # url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={tick}&apikey={API_KEY}"
+        url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={tick}&apikey={API_KEY}'
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            # res = round(data['price']['Global Quote']['05. price'], 2)
+            res = data ['Information']
+            tot_res.append({
+                "stock": tick,
+                "price": res
+            })
+        else:
+            print(f"Request failed with status code {response.status_code}")
+
+    return tot_res
+
+with open(data_file_path_json, 'r') as f:
+    user_settings = json.load(f)
+
+results = result_ticker(user_settings)
+
+print(results)
+
+final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
+                "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
+                "currency_rates":[convert_currency(user_settings)], "stock_prices" : result_ticker(user_settings) }
 
 ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
 with open('proba.json', 'w', encoding= 'utf-8') as f:
