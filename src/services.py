@@ -19,13 +19,13 @@ def search_trans(transactions):
         if trans['Категория'] == "Переводы" and pattern.search(trans['Описание']):
            match_trans.append(trans)
 
+
     return match_trans
 
 
 if __name__ == "__main__":
     transactions = read_transactions_exl_all(data_file_path_exl_all)
     matched_transactions = search_trans(transactions)
-    print(len(matched_transactions))
 
     result = json.dumps(matched_transactions, indent=4, ensure_ascii=False)
     print(result)

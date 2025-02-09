@@ -30,7 +30,7 @@ def reports_cat(filename="reports_cat.json"):
 def spending_by_category(transactions, category, date) -> pd.DataFrame:
 
     start = datetime.strptime(date, '%d.%m.%Y').date()
-    end = start - timedelta(days=90)
+    end = start + timedelta(days=-90)
     start_str = start.strftime('%Y%m%d')
     end_str = end.strftime('%Y%m%d')
 

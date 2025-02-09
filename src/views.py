@@ -2,12 +2,8 @@ import os
 import pandas as pd
 from typing import Any
 from datetime import datetime, date
-import math
 import json
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
+from src.utils import convert_currency, result_ticker
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,172 +41,99 @@ def greeting(time_str):
     else:
         return ("Доброй ночи!")
 
-if __name__ == "__main__":
+
     # date_time = input(" Введите дату и время в формате YYYY-MM-DD HH:MM:SS")
-    date_time = '2021-12-31 12:30:45'
+date_time = '2021-12-31 12:30:45'
 
-    print (greeting(date_time))
-
-
-    dt_obj = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
-    start_of_month = dt_obj.replace(day=1)
-    start_date = start_of_month.strftime('%d.%m.%Y')
-    end_date = dt_obj.strftime('%d.%m.%Y')
-
-    def card_info(transactions,start,end):
-        result = []
-        trans_list = {}
-
-        if isinstance(start, str):
-            start = datetime.strptime(start, '%d.%m.%Y').date()
-        if isinstance(end, str):
-            end = datetime.strptime(end, '%d.%m.%Y').date()
+print (greeting(date_time))
 
 
-        for trans in transactions:
-            transaction_date = datetime.strptime(trans['Дата платежа'], '%d.%m.%Y').date()
-            if start <= transaction_date <= end:
-                card_number_f= trans['Номер карты']
-                card_number = card_number_f[1:5].replace(card_number_f[:-4], card_number_f[-4:])
-                amount = trans.get('Сумма операции', 0)
+dt_obj = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
+start_of_month = dt_obj.replace(day=1)
+start_date = start_of_month.strftime('%d.%m.%Y')
+end_date = dt_obj.strftime('%d.%m.%Y')
 
-                if float(amount) < 0:
+def card_info(transactions,start,end):
+    result = []
+    trans_list = {}
 
-                    if card_number not in trans_list:
-                        trans_list[card_number] = 0
+    if isinstance(start, str):
+        start = datetime.strptime(start, '%d.%m.%Y').date()
+    if isinstance(end, str):
+        end = datetime.strptime(end, '%d.%m.%Y').date()
 
-                    trans_list[card_number] += float(amount)
 
-        for key,value in trans_list.items():
-            result.append ({
-            'last_digits': key,
-            'total_spent': -round(value, 2),
-            'cashback': -round((round(value, 2)/ 100), 2)
+    for trans in transactions:
+        transaction_date = datetime.strptime(trans['Дата платежа'], '%d.%m.%Y').date()
+        if start <= transaction_date <= end:
+            card_number_f= trans['Номер карты']
+            card_number = card_number_f[1:5].replace(card_number_f[:-4], card_number_f[-4:])
+            amount = trans.get('Сумма операции', 0)
+
+            if float(amount) < 0:
+
+                if card_number not in trans_list:
+                    trans_list[card_number] = 0
+
+                trans_list[card_number] += float(amount)
+
+    for key,value in trans_list.items():
+        result.append ({
+        'last_digits': key,
+        'total_spent': -round(value, 2),
+        'cashback': -round((round(value, 2)/ 100), 2)
+    })
+
+    return result
+
+transactions = read_transactions_exl(data_file_path_exl)
+print(card_info(transactions, start_date, end_date))
+
+
+
+def sort_by_amount(transactions,start,end, reverse_str: bool = True):
+    """Функция сортировки по сумме операций по убыванию"""
+    result = []
+    filtered_transactions = []  # Список для хранения транзакций в пределах указанного диапазона
+
+    if isinstance(start, str):
+        start = datetime.strptime(start, '%d.%m.%Y').date()
+    if isinstance(end, str):
+        end = datetime.strptime(end, '%d.%m.%Y').date()
+
+    # Фильтруем транзакции по дате
+    for trans in transactions:
+        transaction_date: date = datetime.strptime(trans['Дата платежа'], '%d.%m.%Y').date()
+        if start <= transaction_date <= end:
+            filtered_transactions.append(trans)
+
+    # Сортируем отфильтрованные транзакции по сумме операции
+    sorted_transactions = sorted(filtered_transactions, key=lambda x: float(x["Сумма операции"]), reverse= reverse_str)
+
+    # Формируем результат, ограничивая до 5 записей
+    for i in range(min(len(sorted_transactions), 5)):
+        trans = sorted_transactions[i]
+        result.append({
+            "date": trans['Дата платежа'],
+            "amount": trans['Сумма операции'],
+            "category": trans['Категория'],
+            "description": trans['Описание']
         })
 
-        return result
+    return result
+transactions_all = read_transactions_exl_all(data_file_path_exl)
 
-    transactions = read_transactions_exl(data_file_path_exl)
-    print(card_info(transactions, start_date,end_date))
+print(sort_by_amount(transactions_all, start_date,end_date))
 
-
-
-    def sort_by_amount(transactions,start,end, reverse_str: bool = True):
-        """Функция сортировки по сумме операций по убыванию"""
-        result = []
-        filtered_transactions = []  # Список для хранения транзакций в пределах указанного диапазона
-
-        if isinstance(start, str):
-            start = datetime.strptime(start, '%d.%m.%Y').date()
-        if isinstance(end, str):
-            end = datetime.strptime(end, '%d.%m.%Y').date()
-
-        # Фильтруем транзакции по дате
-        for trans in transactions:
-            transaction_date: date = datetime.strptime(trans['Дата платежа'], '%d.%m.%Y').date()
-            if start <= transaction_date <= end:
-                filtered_transactions.append(trans)
-
-        # Сортируем отфильтрованные транзакции по сумме операции
-        sorted_transactions = sorted(filtered_transactions, key=lambda x: float(x["Сумма операции"]), reverse= reverse_str)
-
-        # Формируем результат, ограничивая до 5 записей
-        for i in range(min(len(sorted_transactions), 5)):
-            trans = sorted_transactions[i]
-            result.append({
-                "date": trans['Дата платежа'],
-                "amount": trans['Сумма операции'],
-                "category": trans['Категория'],
-                "description": trans['Описание']
-            })
-
-        return result
-    transactions_all = read_transactions_exl_all(data_file_path_exl)
-
-    print(sort_by_amount(transactions_all, start_date,end_date))
+with open(data_file_path_json, 'r') as f:
+    user_settings = json.load(f)
 
 
-
-    API_KEY = os.getenv("EXCHANGERATE_API_KEY")
-
-
-    def convert_currency(user_settings):
-        """Функция конвертации валюты и вывода текущего курса"""
-        tot_res = []
-        currencies = user_settings.get("user_currencies", [])
-
-        for currency in currencies:
-            url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/{currency}"
-            # try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                res = round(data["conversion_rates"]["RUB"], 2)
-                tot_res.append({
-                    "currency_rates": currency,
-                    "rate": res
-                })
-            else:
-                print(f"Request failed with status code {response.status_code}")
-            # except KeyError:
-                # print("Скорее всего закончились бесплатные запросы API")
-
-        return tot_res
-
-    with open(data_file_path_json, 'r') as f:
-        user_settings = json.load(f)
-
-    results = convert_currency(user_settings)
-
-    print(results)
-
-    final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
-                    "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
-                    "currency_rates":[convert_currency(user_settings)]}
-
-    ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
-    with open('proba.json', 'w', encoding= 'utf-8') as f:
-        f.write(ff_result)
-
-
-    API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
-
-    def result_ticker(user_settings):
-        """Функция конвертации валюты и вывода текущего курса"""
-        tot_res = []
-        tickers = user_settings.get("user_stocks", [])
-
-        for tick in tickers:
-            try:
-                # url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={tick}&apikey={API_KEY}"
-                url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={tick}&apikey={API_KEY}'
-                response = requests.get(url)
-                if response.status_code == 200:
-                    data = response.json()
-                    res = round(float(data['Global Quote']['05. price']), 2)
-                    # res = data ['Information']
-                    tot_res.append({
-                        "stock": tick,
-                        "price": res
-                    })
-                # else:
-                #     print(f"Request failed with status code {response.status_code}")
-            except KeyError:
-                print("Скорее всего закончились бесплатные запросы API")
-
-        return tot_res
-
-    with open(data_file_path_json, 'r') as f:
-        user_settings = json.load(f)
-
-    results = result_ticker(user_settings)
-
-    print(results)
-
-    final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
-                    "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
-                    "currency_rates":[convert_currency(user_settings)], "stock_prices" : result_ticker(user_settings) }
-
+print(convert_currency(user_settings))
+final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
+                "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
+                "currency_rates":[convert_currency(user_settings)], "stock_prices" : result_ticker(user_settings)}
+if __name__ == "__main__":
     ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
     with open('proba.json', 'w', encoding= 'utf-8') as f:
         f.write(ff_result)
