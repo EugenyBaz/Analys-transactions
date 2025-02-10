@@ -38,7 +38,7 @@ def convert_currency(user_settings):
 
 
 def result_ticker(user_settings):
-    """Функция конвертации валюты и вывода текущего курса"""
+    """Функция вывода стоимости  пяти тикеров"""
     tot_res = []
     tickers = user_settings.get("user_stocks", [])
 
@@ -59,7 +59,7 @@ def result_ticker(user_settings):
             #     print(f"Request failed with status code {response.status_code}")
         except KeyError:
             print("Скорее всего закончились бесплатные запросы API")
-
+            continue
     return tot_res
 
 

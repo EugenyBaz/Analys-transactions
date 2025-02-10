@@ -11,6 +11,7 @@ data_file_path_exl_all= os.path.join(project_root, "data", "operations.xlsx")
 
 
 def search_trans(transactions):
+    """ Функция вывода переводов физическим лицам"""
 
     match_trans = []
 
@@ -29,7 +30,6 @@ if __name__ == "__main__":
 
     result = json.dumps(matched_transactions, indent=4, ensure_ascii=False)
     print(result)
-
 
 
 

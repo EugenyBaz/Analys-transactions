@@ -28,6 +28,7 @@ def read_transactions_exl_all(file_path: Any) -> list[dict[Any, Any]]:
 
 
 def greeting(time_str):
+    """ Функция приветствия, в зависимости от указанного времени"""
     dt = datetime.strptime(time_str,'%Y-%m-%d %H:%M:%S')
 
     hour = dt.hour
@@ -54,6 +55,7 @@ start_date = start_of_month.strftime('%d.%m.%Y')
 end_date = dt_obj.strftime('%d.%m.%Y')
 
 def card_info(transactions,start,end):
+    """ Функция вывода информации по карте последние 4 цифры, траты, кэшбэк"""
     result = []
     trans_list = {}
 
@@ -92,7 +94,7 @@ print(card_info(transactions, start_date, end_date))
 
 
 def sort_by_amount(transactions,start,end, reverse_str: bool = True):
-    """Функция сортировки по сумме операций по убыванию"""
+    """Функция сортировки по тратам по убыванию"""
     result = []
     filtered_transactions = []  # Список для хранения транзакций в пределах указанного диапазона
 
@@ -133,6 +135,9 @@ print(convert_currency(user_settings))
 final_result = {"greeting": greeting(date_time), "cards" :[card_info(transactions, start_date,end_date )],
                 "top_transactions": [sort_by_amount(transactions_all, start_date,end_date)],
                 "currency_rates":[convert_currency(user_settings)], "stock_prices" : result_ticker(user_settings)}
+
+
+
 if __name__ == "__main__":
     ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
     with open('proba.json', 'w', encoding= 'utf-8') as f:

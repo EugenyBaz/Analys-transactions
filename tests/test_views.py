@@ -101,16 +101,9 @@ def test_card_info(start, end, expected):
 
 transactions_all = read_transactions_exl_all(data_file_path_exl)
 @pytest.mark.parametrize("start, end, reverse_str, expected", [
-    ("01.03.2023", "31.03.2023", True, [({
-        "amount": "-2500.0",
-        "category": "Переводы",
-        "date": "28.02.2023",
-        "description": "Константин Ф."})]),
-    ("01.03.2023", "31.03.2023", False, [({
-        "amount": "-1500.0",
-        "category": "Переводы",
-        "date": "31.03.2023",
-        "description": "На кудыкину гору"})])])
+    ("30.12.2021", "30.12.2021", True, [{'date': '30.12.2021', 'amount': 174000.0, 'category': 'Пополнения', 'description': 'Пополнение через Газпромбанк'}, {'date': '30.12.2021', 'amount': 5046.0, 'category': 'Пополнения', 'description': 'Пополнение через Газпромбанк'}, {'date': '30.12.2021', 'amount': -349.0, 'category': 'Канцтовары', 'description': 'Mitrankov M.V.'}, {'date': '30.12.2021', 'amount': -1411.4, 'category': 'Ж/д билеты', 'description': 'РЖД'}, {'date': '30.12.2021', 'amount': -1411.4, 'category': 'Ж/д билеты', 'description': 'РЖД'}]),
+    ("23.12.2021", "23.12.2021", False,
+     [{'date': '23.12.2021', 'amount': -28001.94, 'category': 'Переводы', 'description': 'Перевод Кредитная карта. ТП 10.2 RUR'}, {'date': '23.12.2021', 'amount': -10000.0, 'category': 'Переводы', 'description': 'Светлана Т.'}, {'date': '23.12.2021', 'amount': -2000.0, 'category': 'Переводы', 'description': 'Дмитрий Ш.'}, {'date': '23.12.2021', 'amount': -250.0, 'category': 'Каршеринг', 'description': 'Ситидрайв'}, {'date': '23.12.2021', 'amount': -250.0, 'category': 'Каршеринг', 'description': 'Ситидрайв'}])])
 
 def test_sort_by_amount(start, end, reverse_str, expected):
     result = sort_by_amount(transactions_all, start, end, reverse_str)
