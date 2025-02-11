@@ -3,6 +3,16 @@ import requests
 from dotenv import load_dotenv
 load_dotenv()
 import json
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("../logs/utils.log")
+file_formatter = logging.Formatter(
+    "%(levelname)s: %(name)s: Request time: %(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S"
+)
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
@@ -14,6 +24,7 @@ ALPHAVANTAGE_API_KEY_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
 
 def convert_currency(user_settings):
     """Функция конвертации валюты и вывода текущего курса"""
+    logger.info("Запуск функции конвертации валюты и вывода текущего курса")
     tot_res = []
     currencies = user_settings.get("user_currencies", [])
 
@@ -22,6 +33,7 @@ def convert_currency(user_settings):
         # try:
         response = requests.get(url)
         if response.status_code == 200:
+            logger.info("Запрос на получение информации по валюте успешен")
             data = response.json()
             res = round(data["conversion_rates"]["RUB"], 2)
             tot_res.append({
@@ -29,6 +41,8 @@ def convert_currency(user_settings):
                 "rate": res
             })
         else:
+            logger.info("Ошибка в получение ответа на запрос на получение информации по валюте"
+                        " скорее всего закончились бесплатные запросы API")
             print(f"Request failed with status code {response.status_code}")
         # except KeyError:
         # print("Скорее всего закончились бесплатные запросы API")
@@ -39,6 +53,7 @@ def convert_currency(user_settings):
 
 def result_ticker(user_settings):
     """Функция вывода стоимости  пяти тикеров"""
+    logger.info("Запуск функции вывода стоимости  пяти тикеров")
     tot_res = []
     tickers = user_settings.get("user_stocks", [])
 
@@ -48,6 +63,7 @@ def result_ticker(user_settings):
             url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={tick}&apikey={ALPHAVANTAGE_API_KEY_API_KEY}'
             response = requests.get(url)
             if response.status_code == 200:
+                logger.info("Запрос на получение информации по акциям успешен")
                 data = response.json()
                 res = round(float(data['Global Quote']['05. price']), 2)
                 # res = data ['Information']
@@ -58,6 +74,8 @@ def result_ticker(user_settings):
             # else:
             #     print(f"Request failed with status code {response.status_code}")
         except KeyError:
+            logger.info("Ошибка в получение ответа на запрос на получение информации по акциям"
+                        " скорее всего закончились бесплатные запросы API")
             print("Скорее всего закончились бесплатные запросы API")
             continue
     return tot_res
@@ -68,7 +86,9 @@ if __name__ == "__main__":
         user_settings = json.load(f)
 
     results_cur = convert_currency(user_settings)
+    logger.info("Вывод печати результата по валютам")
     print("Конвертация валют:", results_cur)
 
     results_tickers = result_ticker(user_settings)
+    logger.info("Вывод печати результата по акциям")
     print("Котировки акций:", results_tickers)
