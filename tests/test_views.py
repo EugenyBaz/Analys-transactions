@@ -113,3 +113,8 @@ def test_sort_by_amount(start, end, reverse_str, expected):
     result = sort_by_amount(transactions_all, start, end, reverse_str)
     assert result == expected
 
+if __name__ == "__main__":
+    ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
+    with open(data_file_path_result_main_screen, 'w', encoding= 'utf-8') as f:
+        f.write(ff_result)
+    logger.info("Печать итогового результата в result_main_screen.json")
