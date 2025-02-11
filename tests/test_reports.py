@@ -72,7 +72,7 @@ def date_tr():
     return "12.12.2021"
 
 # @pytest.mark.parametrize("date, category, expected_result", [("12.12.2021", "Аптеки", {"category": "Аптеки", "total_spend": -6486.5})])
-def test_spending_by_category(category, date_tr):
+def test_spending_by_category():
     """Тестируем корректное фильтрование по дате и сумме."""
     result = spending_by_category(transactions,category,date_tr)
     # assert result == expected_result

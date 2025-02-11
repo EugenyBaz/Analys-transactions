@@ -76,6 +76,7 @@ expected_data = [{
 
 @pytest.mark.parametrize('input_data, expected', [(transactions, expected_data)])
 def test_search_trans(input_data, expected):
+    """ Тестирование поиска транзакции перевода физическим лицам """
     result = search_trans(transactions)
     assert result == expected
 

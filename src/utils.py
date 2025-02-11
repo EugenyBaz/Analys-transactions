@@ -41,7 +41,7 @@ def convert_currency(user_settings):
                 "rate": res
             })
         else:
-            logger.info("Ошибка в получение ответа на запрос на получение информации по валюте"
+            logger.error("Ошибка в получение ответа на запрос на получение информации по валюте"
                         " скорее всего закончились бесплатные запросы API")
             print(f"Request failed with status code {response.status_code}")
         # except KeyError:
@@ -74,7 +74,7 @@ def result_ticker(user_settings):
             # else:
             #     print(f"Request failed with status code {response.status_code}")
         except KeyError:
-            logger.info("Ошибка в получение ответа на запрос на получение информации по акциям"
+            logger.error("Ошибка в получение ответа на запрос на получение информации по акциям"
                         " скорее всего закончились бесплатные запросы API")
             print("Скорее всего закончились бесплатные запросы API")
             continue

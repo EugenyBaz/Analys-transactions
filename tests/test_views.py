@@ -1,6 +1,5 @@
 import pytest
 import os
-import pandas as pd
 from src.views import read_transactions_exl, read_transactions_exl_all, greeting, sort_by_amount
 from src.views import card_info
 
@@ -11,6 +10,7 @@ data_file_path_exl = os.path.join(project_root, "data", "operations.xlsx")
 
 
 def test_read_transactions_exl_valid_file():
+    """ Тест на корректность конвертации и формирования  файла без нулевых ячеек с номером карты  """
     transactions = read_transactions_exl(data_file_path_exl)
     assert isinstance(transactions, list)
     assert all(isinstance(t, dict) for t in transactions)
@@ -19,11 +19,12 @@ def test_read_transactions_exl_valid_file():
 
 
 def test_read_transactions_exl_all_valid_file():
+    """ Тест на корректность конвертации и формирования  файла без нулевых ячеек с датой платежа  """
     transactions = read_transactions_exl_all(data_file_path_exl)
     assert isinstance(transactions, list)
     assert all(isinstance(t, dict) for t in transactions)
     assert len(transactions) > 0
-    assert all('Номер карты' in t.keys() for t in transactions)
+    assert all('Дата платежа' in t.keys() for t in transactions)
 
 
 
@@ -34,6 +35,7 @@ def test_read_transactions_exl_all_valid_file():
     ("2021-12-31 00:00:00", "Доброй ночи!"),
     ("2021-12-31 04:59:59", "Доброй ночи!")])
 def test_greeting(time_str, expected_greeting):
+    """ Тестирование корректного вывода приветствия в зависимости от времени"""
     result = greeting(time_str)
     assert result == expected_greeting
 
@@ -94,6 +96,7 @@ trans_list = [
 
 ])
 def test_card_info(start, end, expected):
+    """ Тестирование корректного вывода результатов с номером карты, тратами и описанием"""
     result = card_info(trans_list, start, end)
     assert result == expected
 
@@ -106,5 +109,7 @@ transactions_all = read_transactions_exl_all(data_file_path_exl)
      [{'date': '23.12.2021', 'amount': -28001.94, 'category': 'Переводы', 'description': 'Перевод Кредитная карта. ТП 10.2 RUR'}, {'date': '23.12.2021', 'amount': -10000.0, 'category': 'Переводы', 'description': 'Светлана Т.'}, {'date': '23.12.2021', 'amount': -2000.0, 'category': 'Переводы', 'description': 'Дмитрий Ш.'}, {'date': '23.12.2021', 'amount': -250.0, 'category': 'Каршеринг', 'description': 'Ситидрайв'}, {'date': '23.12.2021', 'amount': -250.0, 'category': 'Каршеринг', 'description': 'Ситидрайв'}])])
 
 def test_sort_by_amount(start, end, reverse_str, expected):
+    """ Тест на сортировку по убыванию с выводом первых пяти транзакций"""
     result = sort_by_amount(transactions_all, start, end, reverse_str)
     assert result == expected
+

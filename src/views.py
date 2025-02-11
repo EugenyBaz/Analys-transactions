@@ -20,6 +20,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
 data_file_path_exl = os.path.join(project_root, "data", "operations.xlsx")
 data_file_path_json = os.path.join(project_root, "data", "user_settings.json")
+data_file_path_result_main_screen = os.path.join(project_root, "data", "result_main_screen.json")
 
 def read_transactions_exl(file_path: Any) -> list[dict[Any, Any]]:
     """Функция получения, чтения файла excel, преобразование в список словарей без нулевых значений по номеру карты"""
@@ -157,6 +158,6 @@ final_result = {"greeting": greeting(date_time), "cards" :[card_info(transaction
 
 if __name__ == "__main__":
     ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
-    with open('result_main_screen.json', 'w', encoding= 'utf-8') as f:
+    with open(data_file_path_result_main_screen, 'w', encoding= 'utf-8') as f:
         f.write(ff_result)
     logger.info("Печать итогового результата в result_main_screen.json")

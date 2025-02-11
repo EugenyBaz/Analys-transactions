@@ -3,7 +3,16 @@ from datetime import datetime, timedelta
 import os
 import pandas as pd
 import json
-import pytest
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("../logs/reports.log")
+file_formatter = logging.Formatter(
+    "%(levelname)s: %(name)s: Request time: %(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S"
+)
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
@@ -12,6 +21,7 @@ data_file_path_exl_all= os.path.join(project_root, "data", "operations.xlsx")
 
 def reports_cat(filename="reports_cat.json"):
     """ Декоратор вывода результата функции в отдельный json файл"""
+    logger.info("Запуск функции декоратора для вывода функции в отдельный json файл")
     def my_decorator(func):
         def wrapper(*args,**kwargs):
             result = func(*args, **kwargs)
@@ -31,6 +41,7 @@ def reports_cat(filename="reports_cat.json"):
 @reports_cat(filename="reports_cat.json")
 def spending_by_category(transactions, category, date) -> pd.DataFrame:
     """ Функция вывода трат по категории на указанную дату и три месяца ранее"""
+    logger.info("Запуск функции трат по категории на указанную дату и три месяца ранее")
 
     start = datetime.strptime(date, '%d.%m.%Y').date()
     end = start + timedelta(days=-90)
@@ -73,12 +84,6 @@ if __name__ == "__main__":
     transactions = read_transactions_exl_all(data_file_path_exl_all)
     spending_by_category(transactions, category,date_request)
 
-@pytest.fixture
-def category():
-    return "Аптеки"
 
-@pytest.fixture
-def date_tr():
-    return "12.12.2021"
 
 

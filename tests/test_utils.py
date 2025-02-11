@@ -4,6 +4,7 @@ import pytest
 
 @patch('requests.get')
 def test_convert_currency(mock_get):
+    """Тестирование функции запроса стоимости валют """
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"conversion_rates": {"RUB": 97.02}}
@@ -17,6 +18,7 @@ def test_convert_currency(mock_get):
 
 @patch('requests.get')
 def test_result_ticker(mock_get):
+    """Тестирование функции запроса на стоимость акции S&P500 """
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"stock_prices": {"AAPL": 227.63}}
