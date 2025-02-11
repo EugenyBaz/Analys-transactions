@@ -4,6 +4,16 @@ from typing import Any
 from datetime import datetime, date
 import json
 from src.utils import convert_currency, result_ticker
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("../logs/views.log")
+file_formatter = logging.Formatter(
+    "%(levelname)s: %(name)s: Request time: %(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S"
+)
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +23,8 @@ data_file_path_json = os.path.join(project_root, "data", "user_settings.json")
 
 def read_transactions_exl(file_path: Any) -> list[dict[Any, Any]]:
     """Функция получения, чтения файла excel, преобразование в список словарей без нулевых значений по номеру карты"""
+    logger.info("Запуск функции получения, чтения файла excel, преобразование в список словарей"
+                " без нулевых значений по номеру карты")
     df = pd.read_excel(file_path)
     df_filtered = df.dropna(subset=['Номер карты'])
     list_transactions_exl = df_filtered.to_dict(orient="records")
@@ -20,6 +32,8 @@ def read_transactions_exl(file_path: Any) -> list[dict[Any, Any]]:
 
 def read_transactions_exl_all(file_path: Any) -> list[dict[Any, Any]]:
     """Функция получения, чтения файла excel, преобразование в список словарей  без нулевых значений по дате"""
+    logger.info("Запуск функции получения, чтения файла excel,"
+                " преобразование в список словарей  без нулевых значений по дате")
     df = pd.read_excel(file_path)
     df_filtered = df.dropna(subset=['Дата платежа'])
     list_transactions_exl_all = df_filtered.to_dict(orient="records")
@@ -29,6 +43,7 @@ def read_transactions_exl_all(file_path: Any) -> list[dict[Any, Any]]:
 
 def greeting(time_str):
     """ Функция приветствия, в зависимости от указанного времени"""
+    logger.info("Запуск функции приветствия, в зависимости от указанного времени ")
     dt = datetime.strptime(time_str,'%Y-%m-%d %H:%M:%S')
 
     hour = dt.hour
@@ -56,6 +71,7 @@ end_date = dt_obj.strftime('%d.%m.%Y')
 
 def card_info(transactions,start,end):
     """ Функция вывода информации по карте последние 4 цифры, траты, кэшбэк"""
+    logger.info("Запуск функции вывода информации по карте последние 4 цифры, траты, кэшбэк ")
     result = []
     trans_list = {}
 
@@ -95,6 +111,7 @@ print(card_info(transactions, start_date, end_date))
 
 def sort_by_amount(transactions,start,end, reverse_str: bool = True):
     """Функция сортировки по тратам по убыванию"""
+    logger.info("Запуск функции сортировки по тратам по убыванию")
     result = []
     filtered_transactions = []  # Список для хранения транзакций в пределах указанного диапазона
 
@@ -140,5 +157,6 @@ final_result = {"greeting": greeting(date_time), "cards" :[card_info(transaction
 
 if __name__ == "__main__":
     ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
-    with open('proba.json', 'w', encoding= 'utf-8') as f:
+    with open('result_main_screen.json', 'w', encoding= 'utf-8') as f:
         f.write(ff_result)
+    logger.info("Печать итогового результата в result_main_screen.json")
