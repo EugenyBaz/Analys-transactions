@@ -1,10 +1,11 @@
-from unittest.mock import patch, Mock
-from src.utils import convert_currency, result_ticker
-import pytest
+from unittest.mock import MagicMock, Mock, patch
 
-@patch('requests.request')
-def test_convert_currency(mock_get):
-    """Тестирование функции запроса стоимости валют """
+from src.utils import convert_currency, result_ticker
+
+
+@patch("requests.request")
+def test_convert_currency(mock_get: MagicMock) -> None:
+    """Тестирование функции запроса стоимости валют"""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"result": 97.02}
@@ -16,9 +17,9 @@ def test_convert_currency(mock_get):
     assert result == [{"currency_rates": "USD", "rate": 97.02}]
 
 
-@patch('requests.get')
-def test_result_ticker(mock_get):
-    """Тестирование функции запроса на стоимость акции S&P500 """
+@patch("requests.get")
+def test_result_ticker(mock_get: MagicMock) -> None:
+    """Тестирование функции запроса на стоимость акции S&P500"""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"values": [{"close": 227.63}]}
@@ -30,8 +31,8 @@ def test_result_ticker(mock_get):
     assert result == [{"stock": "AAPL", "price": 227.63}]
 
 
-@patch('requests.request')
-def test_convert_currency_key_error(mock_get):
+@patch("requests.request")
+def test_convert_currency_key_error(mock_get: MagicMock) -> None:
     """Тестирование функции при возникновении ошибки KeyError"""
     mock_response = Mock()
     mock_response.status_code = 200
@@ -44,8 +45,8 @@ def test_convert_currency_key_error(mock_get):
     assert len(result) == 0
 
 
-@patch('requests.get')
-def test_result_ticker_key_error(mock_get):
+@patch("requests.get")
+def test_result_ticker_key_error(mock_get: MagicMock) -> None:
     """Тестирование функции при возникновении ошибки KeyError"""
     mock_response = Mock()
     mock_response.status_code = 200
@@ -56,9 +57,3 @@ def test_result_ticker_key_error(mock_get):
     result = result_ticker(user_settings)
 
     assert len(result) == 0
-
-
-
-
-
-

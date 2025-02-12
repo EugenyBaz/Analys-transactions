@@ -1,9 +1,13 @@
-import os
-import requests
-from dotenv import load_dotenv
-load_dotenv()
 import json
 import logging
+import os
+from typing import Any, Dict, List
+
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
@@ -32,7 +36,8 @@ ALPHAVANTAGE_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
 TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY")
 APILAYER_API_KEY = os.getenv("APILAYER_API_KEY")
 
-def convert_currency(user_settings):
+
+def convert_currency(user_settings: Dict[str, Any]) -> List[Dict[str, float]]:
     """Функция конвертации валюты и вывода текущего курса"""
     logger.info("Запуск функции конвертации валюты и вывода текущего курса")
     tot_res = []
@@ -41,33 +46,31 @@ def convert_currency(user_settings):
     for currency in currencies:
         # url = f"https://v6.exchangerate-api.com/v6/{EXCHANGERATE_API_KEY}/latest/{currency}"
         url = f"https://api.apilayer.com/currency_data/convert?to=RUB&from={currency}&amount=1"
-        headers = {
-            "apikey": APILAYER_API_KEY
-        }
+        headers = {"apikey": APILAYER_API_KEY}
 
         response = requests.request("GET", url, headers=headers)
         try:
-        # response = requests.get(url)
+            # response = requests.get(url)
             if response.status_code == 200:
                 logger.info("Запрос на получение информации по валюте успешен")
                 data = response.json()
                 # res = round(data["conversion_rates"]["RUB"], 2)
                 res = round(data["result"], 2)
 
-                tot_res.append({
-                    "currency_rates": currency,
-                    "rate": res
-                })
+                tot_res.append({"currency_rates": currency, "rate": res})
             else:
-                logger.error("Ошибка в получение ответа на запрос на получение информации по валюте"
-                            " скорее всего закончились бесплатные запросы API")
+                logger.error(
+                    "Ошибка в получение ответа на запрос на получение информации по валюте"
+                    " скорее всего закончились бесплатные запросы API"
+                )
                 print(f"Request failed with status code {response.status_code}")
         except KeyError:
             print("Скорее всего закончились бесплатные запросы API")
     logger.info("Вывод результата по вылютам")
     return tot_res
 
-def result_ticker(user_settings):
+
+def result_ticker(user_settings: Dict[str, Any]) -> List[Dict[str, float]]:
     """Функция вывода стоимости  пяти тикеров"""
     logger.info("Запуск функции вывода стоимости  пяти тикеров")
     tot_res = []
@@ -76,25 +79,27 @@ def result_ticker(user_settings):
     for tick in tickers:
         try:
             # url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={tick}&apikey={API_KEY}"
-            # url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={tick}&apikey={ALPHAVANTAGE_API_KEY}'
-            url = (f'https://api.twelvedata.com/time_series?apikey'
-                   f'={TWELVEDATA_API_KEY}&interval=1day&symbol={tick}&type=stock&outputsize=1&format=JSON')
+            # url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=
+            # {tick}&apikey={ALPHAVANTAGE_API_KEY}'
+            url = (
+                f"https://api.twelvedata.com/time_series?apikey"
+                f"={TWELVEDATA_API_KEY}&interval=1day&symbol={tick}&type=stock&outputsize=1&format=JSON"
+            )
             response = requests.get(url)
             if response.status_code == 200:
                 logger.info("Запрос на получение информации по акциям успешен")
                 data = response.json()
                 # res = round(float(data['Global Quote']['05. price']), 2)
-                res = round(float(data['values'][0]['close']), 2)
+                res = round(float(data["values"][0]["close"]), 2)
                 # res = data ['Information']
-                tot_res.append({
-                    "stock": tick,
-                    "price": res
-                })
+                tot_res.append({"stock": tick, "price": res})
             else:
                 print(f"Request failed with status code {response.status_code}")
         except KeyError:
-            logger.error("Ошибка в получение ответа на запрос на получение информации по акциям"
-                        " скорее всего закончились бесплатные запросы API")
+            logger.error(
+                "Ошибка в получение ответа на запрос на получение информации по акциям"
+                " скорее всего закончились бесплатные запросы API"
+            )
             print("Скорее всего закончились бесплатные запросы API")
             continue
     logger.info("Вывод результата по акциям")
@@ -102,7 +107,7 @@ def result_ticker(user_settings):
 
 
 if __name__ == "__main__":
-    with open(data_file_path_json, 'r') as f:
+    with open(data_file_path_json, "r") as f:
         user_settings = json.load(f)
 
     results_cur = convert_currency(user_settings)

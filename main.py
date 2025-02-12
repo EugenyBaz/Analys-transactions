@@ -1,10 +1,8 @@
-
-from src.views import read_transactions_exl_all, read_transactions_exl, greeting, card_info,sort_by_amount
+from src.views import read_transactions_exl_all, read_transactions_exl, greeting, card_info, sort_by_amount
 from src.utils import convert_currency, result_ticker
 import os
 import json
-from datetime import datetime, date
-import pandas as pd
+from datetime import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir))
@@ -14,7 +12,6 @@ data_file_path_result_main_screen = os.path.join(project_root, "data", "result_m
 
 with open(data_file_path_json, 'r') as f:
     user_settings = json.load(f)
-
 
 if __name__ == "__main__":
     date_time = '2021-12-31 12:30:45'
@@ -32,10 +29,6 @@ if __name__ == "__main__":
                     "top_transactions": [sort_by_amount(transactions_all, start_date, end_date)],
                     "currency_rates": [convert_currency(user_settings)], "stock_prices": result_ticker(user_settings)}
 
-    ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
-    with open(data_file_path_result_main_screen, 'w', encoding= 'utf-8') as f:
+    ff_result = json.dumps(final_result, indent=4, ensure_ascii=False)
+    with open(data_file_path_result_main_screen, 'w', encoding='utf-8') as f:
         f.write(ff_result)
-
-
-
-
