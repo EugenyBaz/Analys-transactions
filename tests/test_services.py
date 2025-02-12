@@ -81,4 +81,32 @@ def test_search_trans(input_data, expected):
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    "input_data, expected",
+    [
+        ({"Категория": "Переводы", "Описание": "Иванов И."}, True),
+        ({"Категория": "Покупка", "Описание": "Магазин"}, False),
+        ({"Категория": "Переводы", "Описание": "Петров П.П."}, True),
+    ]
+)
+def test_match_pattern(input_data, expected):
+    """Тестирование соответствия регулярному выражению."""
+    pattern = re.compile(r'\D+ \D{1}\.{1}')
+    actual = bool(pattern.search(input_data["Описание"]))
+    assert actual == expected
 
+
+def test_search_trans_empty_list():
+    """Тестирование функции при передаче пустого списка транзакций."""
+    empty_transactions = []
+    result = search_trans(empty_transactions)
+    assert result == []
+
+def test_search_trans_all_matches():
+    """Тестирование функции при всех элементах, соответствующих критериям отбора."""
+    all_matching_transactions = [
+        {"Категория": "Переводы", "Описание": "Иванов И."},
+        {"Категория": "Переводы", "Описание": "Петров П."},
+    ]
+    result = search_trans(all_matching_transactions)
+    assert result == all_matching_transactions

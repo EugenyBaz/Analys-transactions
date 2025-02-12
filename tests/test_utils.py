@@ -30,7 +30,32 @@ def test_result_ticker(mock_get):
     assert result == [{"stock": "AAPL", "price": 227.63}]
 
 
+@patch('requests.request')
+def test_convert_currency_key_error(mock_get):
+    """Тестирование функции при возникновении ошибки KeyError"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.side_effect = KeyError
+    mock_get.return_value = mock_response
 
+    user_settings = {"user_currencies": ["USD"]}
+    result = convert_currency(user_settings)
+
+    assert len(result) == 0
+
+
+@patch('requests.get')
+def test_result_ticker_key_error(mock_get):
+    """Тестирование функции при возникновении ошибки KeyError"""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.side_effect = KeyError
+    mock_get.return_value = mock_response
+
+    user_settings = {"user_stocks": ["AAPL"]}
+    result = result_ticker(user_settings)
+
+    assert len(result) == 0
 
 
 
