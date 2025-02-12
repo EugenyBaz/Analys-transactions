@@ -33,7 +33,7 @@ def test_result_ticker(mock_get: MagicMock) -> None:
 
 @patch("requests.request")
 def test_convert_currency_key_error(mock_get: MagicMock) -> None:
-    """Тестирование функции при возникновении ошибки KeyError"""
+    """Тестирование функции по выводу стоимости при возникновении ошибки KeyError"""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.side_effect = KeyError
@@ -47,7 +47,7 @@ def test_convert_currency_key_error(mock_get: MagicMock) -> None:
 
 @patch("requests.get")
 def test_result_ticker_key_error(mock_get: MagicMock) -> None:
-    """Тестирование функции при возникновении ошибки KeyError"""
+    """Тестирование функции по выводу стоимости акции при возникновении ошибки KeyError"""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.side_effect = KeyError

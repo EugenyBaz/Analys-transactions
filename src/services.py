@@ -22,7 +22,7 @@ logger.addHandler(file_handler)
 
 
 def search_trans(transactions: List[Dict[Hashable, Any]]) -> List[Dict[Hashable, Any]]:
-    """Функция вывода переводов физическим лицам"""
+    """Функция поиска транзакций переводов физическим лицам"""
     logger.info("Запуск функции вывода переводов физическим лицам")
 
     match_trans = []

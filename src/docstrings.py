@@ -1,3 +1,3 @@
-import tests.test_reports
+import src.reports
 
-help(tests.test_reports)
+help(src.reports)
