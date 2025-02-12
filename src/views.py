@@ -158,5 +158,5 @@ final_result = {"greeting": greeting(date_time), "cards" :[card_info(transaction
 
 if __name__ == "__main__":
     ff_result = json.dumps(final_result, indent=4, ensure_ascii= False)
-    with open('proba.json', 'w', encoding= 'utf-8') as f:
+    with open(data_file_path_result_main_screen, 'w', encoding= 'utf-8') as f:
         f.write(ff_result)
