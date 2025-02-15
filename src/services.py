@@ -36,8 +36,3 @@ def search_trans(transactions: List[Dict[Hashable, Any]]) -> List[Dict[Hashable,
     return match_trans
 
 
-if __name__ == "__main__":
-    transactions = read_transactions_exl_all(data_file_path_exl_all)
-    matched_transactions = search_trans(transactions)
-
-    result = json.dumps(matched_transactions, indent=4, ensure_ascii=False)

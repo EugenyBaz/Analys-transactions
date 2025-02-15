@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, Hashable, List
+import pandas as pd
 
 from src.views import read_transactions_exl_all
 
@@ -43,7 +44,7 @@ def reports_cat(filename: str = "reports_cat.json") -> Callable:
 
 
 @reports_cat(filename="reports_cat.json")
-def spending_by_category(transactions: List[Dict[Hashable, Any]], category: str, date: str) -> Any:
+def spending_by_category(transactions: pd.DataFrame, category: str, date: str) -> dict:
     """Функция вывода трат по категории на указанную дату и три месяца ранее"""
     logger.info("Запуск функции трат по категории на указанную дату и три месяца ранее")
 
@@ -52,42 +53,19 @@ def spending_by_category(transactions: List[Dict[Hashable, Any]], category: str,
     start_str = start.strftime("%Y%m%d")
     end_str = end.strftime("%Y%m%d")
 
-    filtered_transactions_date = []
-    fil_trans_cat = []
-    total_amount = 0.0
 
-    for trans in transactions:
+    # Фильтрация данных по дате и категории
+    mask = (transactions["Категория"] == category) & \
+           (end_str <= transactions["Дата платежа"]) & \
+           (transactions["Дата платежа"] <= start_str)
 
-        if trans["Категория"] == category:
-            transaction_date = datetime.strptime(trans["Дата платежа"], "%d.%m.%Y").date()
-            transaction_date_str = transaction_date.strftime("%Y%m%d")
-            fil_trans_cat.append(transaction_date_str)
+    filtered_df = transactions[mask]
 
-            if end_str <= transaction_date_str <= start_str:
-                filtered_transactions_date.append(trans)
+    # Суммирование расходов
+    total_spend = filtered_df["Сумма операции"].sum() * -1
 
-    for trans in filtered_transactions_date:
-        amount = float(trans["Сумма операции"])
-        if amount < 0:
-            total_amount += amount
-
-        # result = {"category": category, "total_spend": round(total_amount,2)}
-        # print("Результат:", result)
-
-        result = {"category": category, "total_spend": round(total_amount, 2)}
-        logger.info("Вывод  трат по категории на указанную дату и три месяца ранее")
-        return result
+    result = {"category": category, "total_spend": float(round(total_spend, 2))}
+    logger.info("Вывод  трат по категории на указанную дату и три месяца ранее")
+    return result
 
 
-if __name__ == "__main__":
-    date = input("Введите текущую дату в формате DD.MM.YYYY\n")
-    category = input("Введите  категорию").title()
-
-    if date == "":
-        date_request = datetime.now().strftime("%d.%m.%Y")
-    else:
-        date_request = date
-
-    transactions = read_transactions_exl_all(data_file_path_exl_all)
-    result = spending_by_category(transactions, category, date_request)
-    print(result)
