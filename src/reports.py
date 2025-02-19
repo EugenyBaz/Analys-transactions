@@ -2,10 +2,10 @@ import json
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, Hashable, List
+from typing import Any, Callable, Dict
 import pandas as pd
+from src.utils import read_transactions_exl_all
 
-from src.views import read_transactions_exl_all
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
@@ -20,6 +20,9 @@ file_formatter = logging.Formatter(
 )
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
+
+transactions = read_transactions_exl_all(data_file_path_exl_all)
+transactions_df = pd.DataFrame(transactions)
 
 
 def reports_cat(filename: str = "reports_cat.json") -> Callable:
@@ -44,22 +47,28 @@ def reports_cat(filename: str = "reports_cat.json") -> Callable:
 
 
 @reports_cat(filename="reports_cat.json")
-def spending_by_category(transactions: pd.DataFrame, category: str, date: str) -> dict:
+def spending_by_category(transactions_df: pd.DataFrame, category: str, date: str) -> Dict[str, object]:
     """Функция вывода трат по категории на указанную дату и три месяца ранее"""
     logger.info("Запуск функции трат по категории на указанную дату и три месяца ранее")
+    logger.info(f"Тип данных transactions_df: {type(transactions_df)}")
+
+    if not isinstance(transactions_df, pd.DataFrame):
+        transactions_df = pd.DataFrame(transactions_df)
 
     start = datetime.strptime(date, "%d.%m.%Y").date()
     end = start + timedelta(days=-90)
     start_str = start.strftime("%Y%m%d")
     end_str = end.strftime("%Y%m%d")
 
-
+    # transactions_df = pd.DataFrame(transactions)
     # Фильтрация данных по дате и категории
-    mask = (transactions["Категория"] == category) & \
-           (end_str <= transactions["Дата платежа"]) & \
-           (transactions["Дата платежа"] <= start_str)
+    mask = (
+        (transactions_df["Категория"] == category)
+        & (pd.to_datetime(end_str) <= pd.to_datetime(transactions_df["Дата платежа"], format="%d.%m.%Y"))
+        & (pd.to_datetime(transactions_df["Дата платежа"], format="%d.%m.%Y") <= pd.to_datetime(start_str))
+    )
 
-    filtered_df = transactions[mask]
+    filtered_df = transactions_df[mask]
 
     # Суммирование расходов
     total_spend = filtered_df["Сумма операции"].sum() * -1
@@ -67,5 +76,3 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: str) -
     result = {"category": category, "total_spend": float(round(total_spend, 2))}
     logger.info("Вывод  трат по категории на указанную дату и три месяца ранее")
     return result
-
-

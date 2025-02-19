@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List
+from typing import Dict
 
 import pytest
 
@@ -53,15 +53,16 @@ trans_list = [
         "Сумма операции с округлением": 17000.0,
     },
 ]
+# trans_df = pd.DataFrame(trans_list)
 
 
 @pytest.mark.parametrize(
-    "category, date, expected_result", [("Аптеки", "12.12.2021", {"category": "Аптеки", "total_spend": -6486.5})]
+    "category, date, expected_result", [("Аптеки", "12.12.2021", {"category": "Аптеки", "total_spend": 6486.5})]
 )
-def test_spending_by_category(category: str, date: str, expected_result: List[Dict[str, Any]]) -> None:
+def test_spending_by_category(category: str, date: str, expected_result: Dict[str, float]) -> None:
     """Тестируем корректное фильтрование по дате и сумме."""
 
-    result = spending_by_category(trans_list, category, date)
+    result: Dict[str, float] = spending_by_category(trans_list, category, date)
     assert result == expected_result
 
 

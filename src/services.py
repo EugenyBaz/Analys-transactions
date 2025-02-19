@@ -1,10 +1,8 @@
-import json
 import logging
 import os
 import re
 from typing import Any, Dict, Hashable, List
 
-from src.views import read_transactions_exl_all
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
@@ -34,5 +32,3 @@ def search_trans(transactions: List[Dict[Hashable, Any]]) -> List[Dict[Hashable,
 
     logger.info("Вывод переводов физическим лицам")
     return match_trans
-
-
