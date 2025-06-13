@@ -1,8 +1,12 @@
-import pytest
 import re
+from typing import Any, Dict, Hashable, List
+
+import pytest
+
 from src.services import search_trans
 
-transactions =  [{
+transactions = [
+    {
         "Дата операции": "06.06.2018 11:05:01",
         "Дата платежа": "06.06.2018",
         "Статус": "OK",
@@ -14,7 +18,7 @@ transactions =  [{
         "Описание": "Иван Ф.",
         "Бонусы (включая кэшбэк)": 0,
         "Округление на инвесткопилку": 0,
-        "Сумма операции с округлением": 10000.0
+        "Сумма операции с округлением": 10000.0,
     },
     {
         "Дата операции": "03.06.2018 14:19:08",
@@ -28,9 +32,9 @@ transactions =  [{
         "Описание": "Константин Ф.",
         "Бонусы (включая кэшбэк)": 0,
         "Округление на инвесткопилку": 0,
-        "Сумма операции с округлением": 22000.0
+        "Сумма операции с округлением": 22000.0,
     },
-     {
+    {
         "Дата операции": "20.07.2018 16:29:04",
         "Дата платежа": "20.07.2018",
         "Статус": "OK",
@@ -42,10 +46,12 @@ transactions =  [{
         "Описание": "На кудыкину гору",
         "Бонусы (включая кэшбэк)": 0,
         "Округление на инвесткопилку": 0,
-        "Сумма операции с округлением": 3000.0
-    }]
+        "Сумма операции с округлением": 3000.0,
+    },
+]
 
-expected_data = [{
+expected_data = [
+    {
         "Дата операции": "06.06.2018 11:05:01",
         "Дата платежа": "06.06.2018",
         "Статус": "OK",
@@ -57,7 +63,7 @@ expected_data = [{
         "Описание": "Иван Ф.",
         "Бонусы (включая кэшбэк)": 0,
         "Округление на инвесткопилку": 0,
-        "Сумма операции с округлением": 10000.0
+        "Сумма операции с округлением": 10000.0,
     },
     {
         "Дата операции": "03.06.2018 14:19:08",
@@ -71,13 +77,45 @@ expected_data = [{
         "Описание": "Константин Ф.",
         "Бонусы (включая кэшбэк)": 0,
         "Округление на инвесткопилку": 0,
-        "Сумма операции с округлением": 22000.0
-    }]
+        "Сумма операции с округлением": 22000.0,
+    },
+]
 
-@pytest.mark.parametrize('input_data, expected', [(transactions, expected_data)])
-def test_search_trans(input_data, expected):
-    result = search_trans(transactions)
+
+@pytest.mark.parametrize("input_data, expected", [(transactions, expected_data)])
+def test_search_trans(input_data: List[Dict[Hashable, Any]], expected: List[Dict[Hashable, Any]]) -> None:
+    """Тестирование поиска транзакции перевода физическим лицам"""
+    result = search_trans(input_data)
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    "input_data, expected",
+    [
+        ({"Категория": "Переводы", "Описание": "Иванов И."}, True),
+        ({"Категория": "Покупка", "Описание": "Магазин"}, False),
+        ({"Категория": "Переводы", "Описание": "Петров П.П."}, True),
+    ],
+)
+def test_match_pattern(input_data: Dict[Hashable, Any], expected: List[Dict[Hashable, Any]]) -> None:
+    """Тестирование соответствия регулярному выражению."""
+    pattern = re.compile(r"\D+ \D{1}\.{1}")
+    actual = bool(pattern.search(input_data["Описание"]))
+    assert actual == expected
 
+
+def test_search_trans_empty_list() -> None:
+    """Тестирование функции при передаче пустого списка транзакций."""
+    empty_transactions: List[Any] = []
+    result = search_trans(empty_transactions)
+    assert result == []
+
+
+def test_search_trans_all_matches() -> None:
+    """Тестирование функции при всех элементах, соответствующих критериям отбора."""
+    all_matching_transactions: List[Dict[Hashable, Any]] = [
+        {"Категория": "Переводы", "Описание": "Иванов И."},
+        {"Категория": "Переводы", "Описание": "Петров П."},
+    ]
+    result = search_trans(all_matching_transactions)
+    assert result == all_matching_transactions
